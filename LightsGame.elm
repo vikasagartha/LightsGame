@@ -17,24 +17,30 @@ update msg model =
         Toggle ->
             { model | isOn = not model.isOn }
 
+--View 
+
 view model =
     Html.div [] 
-        [ Html.div
-            [ Html.Attributes.style
-                [ ("background-color"
-                , if model.isOn then
-                    "orange"
-                    else 
-                        "grey"
-                  )
-                , ("width", "80px")
-                , ("height", "80px")
-                , ("border-radius", "4px")
-                , ("margin", "2px")
-                ]
-            , Html.Events.onClick Toggle
-            ]
-            []
+        [ lightButton model.isOn 
+        , lightButton model.isOn 
         , Html.hr [] []
         , Html.pre [] [ Html.text <| toString model.isOn ]
         ]
+
+lightButton isOn = 
+    Html.div
+        [ Html.Attributes.style
+            [ ("background-color"
+              , if isOn then
+                    "orange"
+                else 
+                    "grey"
+              )
+            , ("width", "80px")
+            , ("height", "80px")
+            , ("border-radius", "4px")
+            , ("margin", "2px")
+            ]
+        , Html.Events.onClick Toggle
+        ]
+        []
