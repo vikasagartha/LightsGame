@@ -1,4 +1,4 @@
-module LightsGame exposing(Msg(..), Model, update, view, init, defaultBoard, isSolved)
+module LightsGame exposing(Msg(..), Model, update, view, init, isSolved, initWithDefaultBoard)
 
 import Array
 import Matrix exposing (Matrix)
@@ -12,9 +12,21 @@ type alias Model =
 init : Matrix Bool -> Model
 init startingBoard = 
     { isOn = startingBoard }
+        |> update (Toggle {x=0,y=0})
+        |> update (Toggle {x=0,y=0})
+        |> update (Toggle {x=0,y=0})
+        |> update (Toggle {x=0,y=0})
 
-defaultBoard : Matrix Bool
-defaultBoard = Matrix.repeat 2 2 True 
+initWithDefaultBoard : Model 
+initWithDefaultBoard = 
+    { isOn = Matrix.repeat 6 6 False }
+        |> update (Toggle {x=0,y=0})
+        |> update (Toggle {x=2,y=0})
+        |> update (Toggle {x=1,y=4})
+        |> update (Toggle {x=4,y=2})
+        |> update (Toggle {x=5,y=0})
+        |> update (Toggle {x=0,y=2})
+        |> update (Toggle {x=1,y=1})
 
 isSolved : Model -> Bool
 isSolved model =
