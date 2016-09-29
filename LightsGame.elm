@@ -1,4 +1,4 @@
-module LightsGame exposing(Msg(..), Model, update, view, init, defaultBoard)
+module LightsGame exposing(Msg(..), Model, update, view, init, defaultBoard, isSolved)
 
 import Array
 import Matrix exposing (Matrix)
@@ -14,7 +14,14 @@ init startingBoard =
     { isOn = startingBoard }
 
 defaultBoard : Matrix Bool
-defaultBoard = Matrix.repeat 5 5 True 
+defaultBoard = Matrix.repeat 2 2 True 
+
+isSolved : Model -> Bool
+isSolved model =
+    let 
+        onLights = Matrix.filter identity model.isOn
+    in 
+        Array.isEmpty onLights
 
 --Update
 
@@ -44,12 +51,19 @@ toggleLight indexToToggle matrix =
 view : Model -> Html.Html Msg
 view model =
     Html.div [] 
-        [ model.isOn 
-            |> Matrix.indexedMap lightButton
-            |> matrixToDivs
+        [ if isSolved model then 
+            Html.text "You're a winner"
+          else 
+              gameView model
         , Html.hr [] []
         , Html.p [] [ Html.text <| toString model.isOn ]
         ]
+
+gameView : Model -> Html.Html Msg
+gameView model =
+    model.isOn 
+        |> Matrix.indexedMap lightButton
+        |> matrixToDivs
 
 matrixToDivs : Matrix (Html.Html Msg) -> Html.Html Msg
 matrixToDivs matrix = 
@@ -81,6 +95,5 @@ lightButton x y isOn =
             , ("display", "inline-block")
             ]
         , Html.Events.onClick (Toggle { x = x, y = y})
-            --TODO: Use y 
         ]
         []

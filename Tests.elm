@@ -66,7 +66,19 @@ all =
             |> Matrix.get 0 0
             |> ElmTest.assertEqual (Just False)
             )
-             
+        , ElmTest.suite "isSolved"              
+            [ ElmTest.test "True when all lights are off" 
+                (LightsGame.init squareBoard
+                    |> LightsGame.isSolved 
+                    |> ElmTest.assertEqual True
+                )
+            , ElmTest.test "False when some lights are off" 
+                (LightsGame.init squareBoard
+                    |> LightsGame.update (LightsGame.Toggle { x=0, y=0 })
+                    |> LightsGame.isSolved 
+                    |> ElmTest.assertEqual False
+                )
+            ]
         ]
 
 main = ElmTest.runSuiteHtml all
