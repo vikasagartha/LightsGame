@@ -1,11 +1,11 @@
 module Main exposing (..)
 
 import Html.App
-import LightsGame exposing(view, update, initWithDefaultBoard)
+import MultiGame
 
 main : Program Never
 main = Html.App.beginnerProgram 
-  { model = initWithDefaultBoard
-  , view = view
-  , update = update
+  { model = MultiGame.init
+  , view = MultiGame.view
+  , update = MultiGame.update
   }

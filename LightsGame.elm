@@ -7,22 +7,24 @@ import Html.Attributes
 import Html.Events
 
 type alias Model = 
-    { isOn : Matrix (Maybe Bool) }
+    { color : String, isOn : Matrix (Maybe Bool) }
 
 init : Matrix (Maybe Bool) -> Model
 init startingBoard = 
-    { isOn = startingBoard }
-        |> update (Toggle {x=0,y=0})
-        |> update (Toggle {x=0,y=0})
-        |> update (Toggle {x=0,y=0})
-        |> update (Toggle {x=0,y=0})
+    { color = "orange",
+        isOn = startingBoard }
+            |> update (Toggle {x=0,y=0})
+            |> update (Toggle {x=0,y=0})
+            |> update (Toggle {x=0,y=0})
+            |> update (Toggle {x=0,y=0})
 
-initWithDefaultBoard : Model 
-initWithDefaultBoard = 
-    { isOn = 
-        Matrix.repeat 6 6 (Just False) 
-            |> Matrix.set 4 3 Nothing     
-            |> Matrix.set 2 2 Nothing     
+initWithDefaultBoard : String -> Model 
+initWithDefaultBoard color = 
+    { color = color,
+        isOn = 
+            Matrix.repeat 6 6 (Just False) 
+                |> Matrix.set 4 3 Nothing     
+                |> Matrix.set 2 2 Nothing     
     }
         |> update (Toggle {x=0,y=0})
         |> update (Toggle {x=2,y=0})
@@ -78,14 +80,12 @@ view model =
             Html.text "You're a winner"
           else 
               gameView model
-        , Html.hr [] []
-        , Html.p [] [ Html.text <| toString model.isOn ]
         ]
 
 gameView : Model -> Html.Html Msg
 gameView model =
     model.isOn 
-        |> Matrix.indexedMap lightButton
+        |> Matrix.indexedMap (lightButton model.color)
         |> matrixToDivs
 
 matrixToDivs : Matrix (Html.Html Msg) -> Html.Html Msg
@@ -101,8 +101,8 @@ matrixToDivs matrix =
         List.map makeRow [0..height]
             |> Html.div []
 
-lightButton : Int -> Int -> Maybe Bool -> Html.Html Msg
-lightButton x y isOn = 
+lightButton : String -> Int -> Int -> Maybe Bool -> Html.Html Msg
+lightButton color x y isOn = 
     case isOn of 
         Nothing ->
             Html.div
@@ -120,7 +120,7 @@ lightButton x y isOn =
                 [ Html.Attributes.style
                     [ ("background-color"
                       , if isOn then
-                            "orange"
+                           color 
                         else 
                             "grey"
                       )
