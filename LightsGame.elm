@@ -7,9 +7,9 @@ import Html.Attributes
 import Html.Events
 
 type alias Model = 
-    { isOn : Matrix Bool }
+    { isOn : Matrix (Maybe Bool) }
 
-init : Matrix Bool -> Model
+init : Matrix (Maybe Bool) -> Model
 init startingBoard = 
     { isOn = startingBoard }
         |> update (Toggle {x=0,y=0})
@@ -19,7 +19,11 @@ init startingBoard =
 
 initWithDefaultBoard : Model 
 initWithDefaultBoard = 
-    { isOn = Matrix.repeat 6 6 False }
+    { isOn = 
+        Matrix.repeat 6 6 (Just False) 
+            |> Matrix.set 4 3 Nothing     
+            |> Matrix.set 2 2 Nothing     
+    }
         |> update (Toggle {x=0,y=0})
         |> update (Toggle {x=2,y=0})
         |> update (Toggle {x=1,y=4})
@@ -31,7 +35,10 @@ initWithDefaultBoard =
 isSolved : Model -> Bool
 isSolved model =
     let 
-        onLights = Matrix.filter identity model.isOn
+        isOn maybeIsOn =
+            maybeIsOn
+                |> Maybe.withDefault False
+        onLights = Matrix.filter isOn model.isOn
     in 
         Array.isEmpty onLights
 
@@ -49,14 +56,18 @@ update msg model =
         Toggle indexToToggle ->
             { model | isOn = toggleLight indexToToggle model.isOn }
 
-toggleLight : LightIndex -> Matrix Bool -> Matrix Bool
+toggleLight : LightIndex -> Matrix (Maybe Bool) -> Matrix (Maybe Bool)
 toggleLight indexToToggle matrix =
-    matrix
-        |> Matrix.update indexToToggle.x indexToToggle.y not
-        |> Matrix.update (indexToToggle.x + 1) indexToToggle.y not
-        |> Matrix.update (indexToToggle.x - 1) indexToToggle.y not
-        |> Matrix.update indexToToggle.x (indexToToggle.y + 1) not
-        |> Matrix.update indexToToggle.x (indexToToggle.y - 1) not
+    let 
+        toggleMaybeBool maybeBool =
+            Maybe.map not maybeBool
+    in
+        matrix
+            |> Matrix.update indexToToggle.x indexToToggle.y toggleMaybeBool
+            |> Matrix.update (indexToToggle.x + 1) indexToToggle.y toggleMaybeBool
+            |> Matrix.update (indexToToggle.x - 1) indexToToggle.y toggleMaybeBool
+            |> Matrix.update indexToToggle.x (indexToToggle.y + 1) toggleMaybeBool
+            |> Matrix.update indexToToggle.x (indexToToggle.y - 1) toggleMaybeBool
 
 --View 
 
@@ -90,22 +101,35 @@ matrixToDivs matrix =
         List.map makeRow [0..height]
             |> Html.div []
 
-lightButton : Int -> Int -> Bool -> Html.Html Msg
+lightButton : Int -> Int -> Maybe Bool -> Html.Html Msg
 lightButton x y isOn = 
-    Html.div
-        [ Html.Attributes.style
-            [ ("background-color"
-              , if isOn then
-                    "orange"
-                else 
-                    "grey"
-              )
-            , ("width", "40px")
-            , ("height", "40px")
-            , ("border-radius", "4px")
-            , ("margin", "2px")
-            , ("display", "inline-block")
-            ]
-        , Html.Events.onClick (Toggle { x = x, y = y})
-        ]
-        []
+    case isOn of 
+        Nothing ->
+            Html.div
+                [ Html.Attributes.style
+                    [ ("width", "40px")
+                    , ("height", "40px")
+                    , ("border-radius", "4px")
+                    , ("margin", "2px")
+                    , ("display", "inline-block")
+                    ]
+                ]
+                []
+        Just isOn ->
+            Html.div
+                [ Html.Attributes.style
+                    [ ("background-color"
+                      , if isOn then
+                            "orange"
+                        else 
+                            "grey"
+                      )
+                    , ("width", "40px")
+                    , ("height", "40px")
+                    , ("border-radius", "4px")
+                    , ("margin", "2px")
+                    , ("display", "inline-block")
+                    ]
+                , Html.Events.onClick (Toggle { x = x, y = y})
+                ]
+                []
